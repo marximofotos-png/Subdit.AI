@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subdit.IA | Estudiá de una</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --bg-color: #090d16;
+            --chat-bg: rgba(30, 41, 59, 0.45);
+            --text-color: #f8fafc;
+            --accent-color: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --user-msg: #312e81;
+            --bot-msg: #1e293b;
+            --danger-color: #f43f5e;
+            --success-color: #10b981;
+            --gold-color: #f59e0b;
+            --panel-blur: blur(12px);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(217, 70, 239, 0.12) 0px, transparent 50%),
+                linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            animation: pulseBackground 15s ease infinite alternate;
+        }
+
+        @keyframes pulseBackground {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 10px 20px; }
+        }
+
+        #sidebar {
+            width: 290px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: var(--panel-blur);
+            -webkit-backdrop-filter: var(--panel-blur);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 25px 20px;
+            gap: 20px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .sidebar-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-align: center;
+            padding-bottom: 15px;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 12px; flex: 1; overflow-y: auto; }
+        .sidebar-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .sidebar-btn:hover { background: rgba(139, 92, 246, 0.15); border-color: var(--accent-color); color: #fff; transform: translateX(4px); }
+        .sidebar-btn.active { background: linear-gradient(135deg, var(--accent-color), #7c3aed); border-color: var(--accent-color); color: #fff; box-shadow: 0 4px 15px var(--accent-glow); }
+        
+        /* BARRA DE ESPIAR EXPANDIDA */
+        .form-select {
+            width: 100% !important;
+            min-height: 40px;
+            background-color: #0f172a;
+            color: white;
+            border: 1px solid #475569;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .sidebar-footer { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; font-size: 0.88rem; }
+        .change-salon-btn { background-color: var(--danger-color); color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; margin-top: 5px; width:100%; }
+
+        #main-content { flex: 1; display: flex; flex-direction: column; position: relative; height: 100%; }
+        .section-content { display: none; flex: 1; flex-direction: column; height: 100%; overflow: hidden; }
+        .section-content.active { display: flex; }
+        
+        header { background: rgba(15, 23, 42, 0.35); backdrop-filter: var(--panel-blur); -webkit-backdrop-filter: var(--panel-blur); padding: 18px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.06); position: relative; }
+        header h2 { font-weight: 800; font-size: 1.4rem; }
+
+        .chat-area { flex: 1; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; gap: 18px; }
+        .message { max-width: 75%; padding: 14px 18px; border-radius: 16px; line-height: 1.5; font-size: 0.96rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .user-message { background: linear-gradient(135deg, #312e81, #1e1b4b); align-self: flex-end; border-bottom-right-radius: 3px; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .bot-message { background: rgba(30, 41, 59, 0.8); backdrop-filter: var(--panel-blur); align-self: flex-start; border-bottom-left-radius: 3px; border: 1px solid rgba(255, 255, 255, 0.05); }
+
+        .input-bar { background: rgba(15, 23, 42, 0.6); backdrop-filter: var(--panel-blur); padding: 18px; display: flex; gap: 12px; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+        .chat-textarea { flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-color); padding: 14px; border-radius: 10px; font-size: 0.98rem; outline: none; resize: none; height: 48px; }
+
+        /* ARBOL DE CURSOS MAESTROS */
+        .salon-collapse-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+        .salon-collapse-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: bold; background: rgba(15, 23, 42, 0.5); font-size: 1rem; }
+        .salon-collapse-header:hover { background: rgba(139, 92, 246, 0.15); }
+        .salon-collapse-arrow { transition: transform 0.3s; font-size: 0.9rem; color: var(--accent-color); }
+        .salon-collapse-arrow.open { transform: rotate(180deg); }
+        .salon-collapse-content { display: none; padding: 15px; background: rgba(0,0,0,0.25); border-top: 1px solid rgba(255,255,255,0.05); }
+        .user-nested-item { padding: 8px 14px; border-left: 3px solid var(--accent-color); margin-bottom: 8px; background: rgba(255,255,255,0.02); border-radius: 0 8px 8px 0; font-size: 0.95rem; }
+
+        #registration-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 12, 0.85); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 20px; width: 90%; max-width: 420px; padding: 35px; }
+        .form-input { width: 100%; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; color: white; outline: none; }
+        .modal-btn { background-color: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .login-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .login-tab-btn { flex: 1; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .login-tab-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+        .login-form-pane { display: none; }
+        .login-form-pane.active { display: block; }
+        .horarios-table { width: 100%; border-collapse: collapse; background: #1e293b; }
+        .horarios-table th, .horarios-table td { border: 1px solid #475569; padding: 10px; text-align: center; }
+        .horarios-table th { background: var(--accent-color); }
+        .horario-cell-input { width: 100%; background: transparent; border: none; color: white; text-align: center; outline: none; }
+        .horarios-save-btn { background: var(--accent-color); color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; float: right; }
+    </style>
+</head>
+<body>
+
+    <div id="registration-modal" style="display: none;">
+        <div class="modal-content">
+            <h3 style="text-align: center; font-weight: 800; margin-bottom: 15px;">Ingresar a Subdit.IA 🎒</h3>
+            <div class="login-tabs">
+                <button id="tab-btn-estudiante" class="login-tab-btn active" onclick="switchLoginTab('estudiante')">Estudiante</button>
+                <button id="tab-btn-creador" class="login-tab-btn" onclick="switchLoginTab('creador')">Creador</button>
+                <button id="tab-btn-admin" class="login-tab-btn" onclick="switchLoginTab('admin')">Admin</button>
+            </div>
+            
+            <div id="form-estudiante" class="login-form-pane active">
+                <div class="form-group"><label>Tu Apodo:</label><input type="text" id="reg-nickname" class="form-input" placeholder="Ej: Lean" autocomplete="off"></div>
+                <div class="form-group" style="margin-top:10px;"><label>Año:</label><select id="reg-year" class="form-select"><option value="1">1° año</option><option value="2">2° año</option><option value="3">3° año</option><option value="4">4° año</option><option value="5">5° año</option><option value="6">6° año</option></select></div>
+                <div class="form-group" style="margin-top:10px;"><label>División:</label><select id="reg-division" class="form-select"><option value="1ra">1ra</option><option value="2da">2da</option></select></div>
+                <div class="form-group" style="margin-top:10px;"><label>Clave secreta:</label><input type="password" id="reg-course-key" class="form-input" placeholder="Clave de tu curso"></div>
+                <button class="modal-btn" style="margin-top:15px;" onclick="loginEstudiante()">Ingresar como Estudiante</button>
+            </div>
+            
+            <div id="form-creador" class="login-form-pane">
+                <div class="form-group"><label>Credencial de Acceso:</label><input type="email" id="creador-email" class="form-input" placeholder="Tu correo verificado"></div>
+                <div class="form-group" style="margin-top:10px;"><label>Contraseña:</label><input type="password" id="creador-password" class="form-input" placeholder="••••••••"></div>
+                <button class="modal-btn" style="background-color: var(--gold-color); margin-top:15px;" onclick="loginCreador()">Ingresar como Creador</button>
+            </div>
+            
+            <div id="form-admin" class="login-form-pane">
+                <div class="form-group"><label>Gmail de Moderador:</label><input type="email" id="admin-email" class="form-input" placeholder="Tu correo de moderador"></div>
+                <div class="form-group" style="margin-top:10px;"><label>Apodo:</label><input type="text" id="admin-nickname" class="form-input" placeholder="Ej: Mod Juan"></div>
+                <button class="modal-btn" style="margin-top:15px;" onclick="requestAdminAccess()">Solicitar Autorización</button>
+                <p id="admin-status-msg" style="font-size:0.8rem; color:#94a3b8; text-align:center; display:none; margin-top:10px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="sidebar-title">Subdit.IA</div>
+        <div class="sidebar-menu">
+            <button id="btn-subdit" class="sidebar-btn active" onclick="switchTab('subdit')">Subdit.AI 🎒</button>
+            <button id="btn-comunidad" class="sidebar-btn" onclick="switchTab('comunidad')">Comunidad 💬</button>
+            <button id="btn-horarios" class="sidebar-btn" onclick="switchTab('horarios')">Horarios 📅</button>
+            <button id="btn-desafios" class="sidebar-btn" onclick="switchTab('desafios')">Desafíos Semanales 🏆</button>
+            <button id="btn-soporte" class="sidebar-btn" onclick="switchTab('soporte')">Soporte Técnico 🔧</button>
+            <button id="btn-admin" class="sidebar-btn" style="display: none;" onclick="switchTab('admin')">Panel Admin ⚙️</button>
+        </div>
+        <div class="sidebar-footer">
+            <div>Firma: <span id="span-display-name">-</span></div>
+            <div>Rol: <span id="display-role">Estudiante</span></div>
+            <div id="display-salon-container">Curso: <span id="display-salon">-</span></div>
+            <div id="creator-salon-picker" style="display: none; margin-top:5px; width: 100%;">
+                <select id="creator-salon-select" class="form-select" onchange="creatorSwitchSalon(this.value)"></select>
+            </div>
+            <button id="sidebar-logout-btn" class="change-salon-btn" onclick="resetRegistration()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div id="section-subdit" class="section-content active">
+            <header>
+                <h2>Subdit.IA 🎒</h2>
+                <p>La inteligencia artificial más copada</p>
+                <button id="reset-btn">Limpiar chat</button>
+            </header>
+            <div id="chat-container" class="chat-area">
+                <div class="message bot-message">¡Qué onda che! ¿Cómo va? Tirame lo que tengas que estudiar o resolver y lo liquidamos al toque.</div>
+            </div>
+            <div class="input-bar">
+                <textarea id="user-input" class="chat-textarea" placeholder="Mandale un mensaje a la IA..."></textarea>
+                <button id="send-btn" class="send-button">Enviar</button>
+            </div>
+        </div>
+
+        <div id="section-comunidad" class="section-content">
+            <header><h2>Comunidad de Alumnos 💬</h2></header>
+            <div id="community-chat-container" class="chat-area"></div>
+            <div id="emoji-advantage-area"></div>
+            <div class="input-bar">
+                <textarea id="community-user-input" class="chat-textarea" placeholder="Chateá con tu curso..."></textarea>
+                <button id="community-send-btn" class="send-button">Enviar</button>
+            </div>
+        </div>
+
+        <div id="section-horarios" class="section-content">
+            <header><h2>Horario de Clases 📅</h2></header>
+            <div class="horarios-container">
+                <table class="horarios-table">
+                    <thead><tr><th>Módulo</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead>
+                    <tbody id="horarios-table-body"></tbody>
+                </table>
+                <button class="horarios-save-btn" onclick="saveHorarios()">Guardar Horario</button>
+            </div>
+        </div>
+
+        <div id="section-desafios" class="section-content">
+            <header><h2>Desafíos Semanales 🏆</h2></header>
+            <div class="desafios-container">
+                <div class="riddle-box">
+                    <h3 id="riddle-text" style="text-align:center; margin-bottom:15px; color:var(--gold-color);">Cargando enigma...</h3>
+                    <div class="clues-box"><div id="clues-list"></div></div>
+                </div>
+                <div style="display:flex; gap:10px; width:100%; max-width:600px; margin-top:20px;">
+                    <input type="text" id="challenge-answer-input" class="form-input" placeholder="Tu respuesta...">
+                    <button class="send-button" onclick="submitChallengeAnswer()">Arriesgar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-soporte" class="section-content">
+            <header><h2>Soporte Técnico 🔧</h2></header>
+            <div class="soporte-container">
+                <div id="soporte-client-view" class="soporte-form">
+                    <h3>Reportar un error técnico o bug</h3>
+                    <textarea id="soporte-message" class="chat-textarea" style="height:120px;" placeholder="Explicá acá qué problema o bug encontraste..."></textarea>
+                    <button class="modal-btn" style="margin-top:10px;" onclick="sendSupportTicket()">Enviar Reporte al Panel</button>
+                </div>
+                <div id="soporte-history-view" style="margin-top: 15px;">
+                    <h3>Historial de Reportes</h3>
+                    <div id="soporte-tickets-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-admin" class="section-content">
+            <header><h2>Panel de Control Administrador ⚙️</h2></header>
+            <div style="padding: 25px; display: flex; flex-direction: column; gap: 20px; overflow-y:auto; flex:1;">
+                <div id="superadmin-tools" class="admin-section" style="display: none;">
+                    <h3>Herramientas Maestras del Creador</h3>
+                    <button class="modal-btn" style="background-color: var(--gold-color);" onclick="generateAdminLink()">Generar Invitación Administrador Única</button>
+                    <button class="modal-btn" style="background-color: var(--success-color); margin-top: 8px;" onclick="copyAdminLink()">Copiar Invitación</button>
+                    <input type="text" id="generated-link-input" class="form-input" style="background-color: #0f172a; margin-top: 10px;" readonly>
+                    
+                    <h4 style="margin-top: 20px; margin-bottom: 5px; color:var(--accent-color);">Solicitudes pendientes:</h4>
+                    <div id="pending-admins-list" style="margin-bottom:20px;">Cargando...</div>
+
+                    <h4 style="margin-top: 10px; margin-bottom: 12px; color:var(--gold-color);">Estructura Global (Salones y Alumnos):</h4>
+                    <div id="academy-salones-collapse-container"></div>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Control de Discipline / Suspensiones</h3>
+                    <input type="text" id="suspend-nickname" class="form-input" placeholder="Nombre exacto del alumno">
+                    <select id="suspend-days" class="form-select" style="margin-top:10px;"><option value="1">1 Día de Ban</option><option value="3">3 Días de Ban</option></select>
+                    <button class="modal-btn" style="background-color:var(--danger-color); margin-top:10px;" onclick="suspendUser()">Suspender Cuenta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="bg-music" src="Coffee_and_Heavy_Clouds.mp3" loop></audio>
+    <button id="music-toggle-btn" style="position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background-color: var(--accent-color); border: none; color: white; font-size: 1.2rem; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 9999;">🔇</button>
+
+    <script src="app.js"></script>
+</body>
+</html>
